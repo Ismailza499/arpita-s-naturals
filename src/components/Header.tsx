@@ -1,10 +1,19 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, ShoppingCart, Menu, X, Globe } from "lucide-react";
+import { Search, ShoppingCart, Menu, X, Globe, ChevronDown } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { products } from "@/data/products";
 import logo from "@/assets/logo.png";
+
+const navLinks = [
+  { to: "/", labelEn: "Home", labelMr: "मुख्यपृष्ठ" },
+  { to: "/products", labelEn: "Shop", labelMr: "दुकान" },
+  { to: "/our-story", labelEn: "Our Story", labelMr: "आमची कथा" },
+  { to: "/blog", labelEn: "Blog", labelMr: "ब्लॉग" },
+  { to: "/about", labelEn: "About", labelMr: "आमच्याबद्दल" },
+  { to: "/contact", labelEn: "Contact", labelMr: "संपर्क" },
+];
 
 const Header = () => {
   const { totalItems, setIsCartOpen } = useCart();
@@ -38,28 +47,28 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b shadow-sm">
+    <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b">
       <div className="container mx-auto">
         {/* Top bar */}
-        <div className="flex items-center justify-between h-14 md:h-16 px-2">
+        <div className="flex items-center justify-between h-16 px-2">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <img src={logo} alt="Go Arpita" className="h-9 md:h-11 w-auto" />
+            <img src={logo} alt="Go Arpita" className="h-10 md:h-12 w-auto" />
           </Link>
 
           {/* Desktop search */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-6 relative">
+          <div className="hidden md:flex flex-1 max-w-lg mx-6 relative">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder={t("Search for products...", "उत्पादने शोधा...")}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm transition-all"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary border border-transparent focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm transition-all"
               />
               {suggestions.length > 0 && (
-                <div className="absolute top-full mt-1 w-full bg-card rounded-lg shadow-lg border overflow-hidden">
+                <div className="absolute top-full mt-2 w-full bg-card rounded-xl shadow-lg border overflow-hidden animate-fade-in">
                   {suggestions.map((p) => (
                     <button
                       key={p.id}
@@ -76,11 +85,11 @@ const Header = () => {
           </div>
 
           {/* Right actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {/* Language toggle */}
             <button
               onClick={() => setLanguage(language === "en" ? "mr" : "en")}
-              className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium bg-secondary hover:bg-herb-light transition-colors"
+              className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-secondary hover:bg-primary/10 transition-colors"
             >
               <Globe className="h-3.5 w-3.5" />
               {language === "en" ? "मराठी" : "EN"}
@@ -89,7 +98,7 @@ const Header = () => {
             {/* Mobile search toggle */}
             <button
               onClick={() => setShowSearch(!showSearch)}
-              className="md:hidden p-2 rounded-full hover:bg-secondary transition-colors"
+              className="md:hidden p-2.5 rounded-xl hover:bg-secondary transition-colors"
             >
               <Search className="h-5 w-5" />
             </button>
@@ -97,11 +106,11 @@ const Header = () => {
             {/* Cart */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2 rounded-full bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+              className="relative p-2.5 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all"
             >
               <ShoppingCart className="h-5 w-5" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold animate-scale-in">
                   {totalItems}
                 </span>
               )}
@@ -110,7 +119,7 @@ const Header = () => {
             {/* Mobile menu */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="md:hidden p-2 rounded-full hover:bg-secondary transition-colors"
+              className="md:hidden p-2.5 rounded-xl hover:bg-secondary transition-colors"
             >
               {showMobileMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -119,7 +128,7 @@ const Header = () => {
 
         {/* Mobile search bar */}
         {showSearch && (
-          <div className="md:hidden px-2 pb-3 relative">
+          <div className="md:hidden px-2 pb-3 relative animate-fade-in">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
@@ -127,12 +136,12 @@ const Header = () => {
                 placeholder={t("Search for products...", "उत्पादने शोधा...")}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-secondary border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary border border-transparent focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
                 autoFocus
               />
             </div>
             {suggestions.length > 0 && (
-              <div className="absolute left-2 right-2 top-full bg-card rounded-lg shadow-lg border overflow-hidden z-50">
+              <div className="absolute left-2 right-2 top-full bg-card rounded-xl shadow-lg border overflow-hidden z-50 animate-fade-in">
                 {suggestions.map((p) => (
                   <button
                     key={p.id}
@@ -151,18 +160,19 @@ const Header = () => {
         {/* Mobile nav */}
         {showMobileMenu && (
           <nav className="md:hidden border-t px-4 py-3 space-y-1 animate-fade-in">
-            <Link to="/" onClick={() => setShowMobileMenu(false)} className="block py-2 text-sm font-medium hover:text-primary transition-colors">
-              {t("Home", "मुख्यपृष्ठ")}
-            </Link>
-            <Link to="/products" onClick={() => setShowMobileMenu(false)} className="block py-2 text-sm font-medium hover:text-primary transition-colors">
-              {t("Products", "उत्पादने")}
-            </Link>
-            <Link to="/about" onClick={() => setShowMobileMenu(false)} className="block py-2 text-sm font-medium hover:text-primary transition-colors">
-              {t("About Us", "आमच्याबद्दल")}
-            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => setShowMobileMenu(false)}
+                className="block py-2.5 text-sm font-medium hover:text-primary transition-colors"
+              >
+                {language === "en" ? link.labelEn : link.labelMr}
+              </Link>
+            ))}
             <button
               onClick={() => { setLanguage(language === "en" ? "mr" : "en"); setShowMobileMenu(false); }}
-              className="flex items-center gap-2 py-2 text-sm font-medium hover:text-primary transition-colors"
+              className="flex items-center gap-2 py-2.5 text-sm font-medium hover:text-primary transition-colors w-full"
             >
               <Globe className="h-4 w-4" />
               {language === "en" ? "मराठी" : "English"}
@@ -171,10 +181,16 @@ const Header = () => {
         )}
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-6 h-10 px-2 text-sm">
-          <Link to="/" className="font-medium hover:text-primary transition-colors">{t("Home", "मुख्यपृष्ठ")}</Link>
-          <Link to="/products" className="font-medium hover:text-primary transition-colors">{t("All Products", "सर्व उत्पादने")}</Link>
-          <Link to="/about" className="font-medium hover:text-primary transition-colors">{t("About Us", "आमच्याबद्दल")}</Link>
+        <nav className="hidden md:flex items-center gap-1 h-11 px-2 text-sm">
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="px-3 py-1.5 rounded-lg font-medium hover:text-primary hover:bg-primary/5 transition-all"
+            >
+              {language === "en" ? link.labelEn : link.labelMr}
+            </Link>
+          ))}
         </nav>
       </div>
     </header>
