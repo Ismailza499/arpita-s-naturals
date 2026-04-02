@@ -1,0 +1,65 @@
+import { Link } from "react-router-dom";
+import { Leaf, Heart, Instagram, Phone, Mail } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+
+const Footer = () => {
+  const { t } = useLanguage();
+
+  return (
+    <footer className="bg-foreground text-background/80 mt-auto">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Brand */}
+          <div>
+            <h3 className="text-xl font-bold text-background flex items-center gap-2">
+              <Leaf className="h-5 w-5" />
+              Go Arpita
+            </h3>
+            <p className="text-sm mt-2 italic text-background/60">{t("Go Health Go Wealth", "आरोग्य हीच संपत्ती")}</p>
+            <p className="text-sm mt-3 leading-relaxed">
+              {t(
+                "Traditional Ayurvedic products made with love, using pure Desi cow-based ingredients.",
+                "शुद्ध देशी गाय-आधारित घटकांचा वापर करून प्रेमाने बनवलेली पारंपरिक आयुर्वेदिक उत्पादने."
+              )}
+            </p>
+          </div>
+
+          {/* Links */}
+          <div>
+            <h4 className="font-semibold text-background mb-3">{t("Quick Links", "जलद लिंक्स")}</h4>
+            <div className="space-y-2 text-sm">
+              <Link to="/" className="block hover:text-background transition-colors">{t("Home", "मुख्यपृष्ठ")}</Link>
+              <Link to="/products" className="block hover:text-background transition-colors">{t("Products", "उत्पादने")}</Link>
+              <Link to="/about" className="block hover:text-background transition-colors">{t("About Us", "आमच्याबद्दल")}</Link>
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="font-semibold text-background mb-3">{t("Contact", "संपर्क")}</h4>
+            <div className="space-y-2 text-sm">
+              <a href="tel:+919999999999" className="flex items-center gap-2 hover:text-background transition-colors">
+                <Phone className="h-4 w-4" /> +91 99999 99999
+              </a>
+              <a href="mailto:hello@goarpita.com" className="flex items-center gap-2 hover:text-background transition-colors">
+                <Mail className="h-4 w-4" /> hello@goarpita.com
+              </a>
+              <a href="https://instagram.com/goarpita" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-background transition-colors">
+                <Instagram className="h-4 w-4" /> @goarpita
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-background/10 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-2 text-xs">
+          <p>© 2026 Go Arpita. {t("All rights reserved.", "सर्व हक्क राखीव.")}</p>
+          <p className="flex items-center gap-1">
+            {t("Made with", "प्रेमाने बनवले")} <Heart className="h-3 w-3 text-destructive fill-destructive" /> {t("in India", "भारतात")}
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
