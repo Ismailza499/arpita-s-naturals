@@ -1,18 +1,42 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shield, Leaf, Hand, Droplets, ArrowRight, Star, ChevronRight, Sparkles, Heart, Truck, BadgeCheck } from "lucide-react";
+import { Shield, Leaf, Hand, Droplets, ArrowRight, Star, ChevronRight, Sparkles, Heart, Truck, BadgeCheck, Quote, Award, Users, Clock, ShieldCheck } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { products, categories } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import PanchagavyaPromise from "@/components/PanchagavyaPromise";
 import BestSellers from "@/components/BestSellers";
 import heroBg from "@/assets/hero-bg.jpg";
+import categoryAll from "@/assets/category-all.png";
+import categorySkincare from "@/assets/category-skincare.png";
+import categoryAyurvedic from "@/assets/category-ayurvedic.png";
+import categoryNatural from "@/assets/category-natural.png";
+
+const categoryImages: Record<string, string> = {
+  "all": categoryAll,
+  "skin-care": categorySkincare,
+  "ayurvedic-treatments": categoryAyurvedic,
+  "natural-products": categoryNatural,
+};
 
 const trustBadges = [
   { icon: Leaf, label: "100% Natural", labelMr: "१००% नैसर्गिक" },
   { icon: Hand, label: "Handmade", labelMr: "हस्तनिर्मित" },
   { icon: Droplets, label: "Desi Cow Based", labelMr: "देशी गाय आधारित" },
   { icon: Shield, label: "Chemical Free", labelMr: "रसायनमुक्त" },
+];
+
+const reviews = [
+  { name: "Priya Sharma", location: "Mumbai", text: "The Panchagavya soap transformed my skin! So gentle and natural. I've been using it for 3 months and the results are amazing.", textMr: "पंचगव्य साबणाने माझी त्वचा बदलली! खूप सौम्य आणि नैसर्गिक. मी ३ महिने वापरत आहे.", rating: 5, verified: true, product: "Panchagavya Soap" },
+  { name: "Rahul Mhatre", location: "Pune", text: "Nasya drops helped my chronic sinus problem. After trying many medicines, this truly worked. Ayurvedic magic!", textMr: "नस्य ड्रॉप्सने माझ्या सायनसच्या जुन्या समस्येला मदत केली. खरोखर आयुर्वेदिक जादू!", rating: 5, verified: true, product: "Panchagavya Nasya" },
+  { name: "Sneha Kulkarni", location: "Nagpur", text: "Love the handmade quality. You can feel the purity in every product. My whole family uses Go Arpita products now!", textMr: "हस्तनिर्मित गुणवत्ता आवडते. शुद्धता जाणवते! आता माझे संपूर्ण कुटुंब वापरते!", rating: 5, verified: true, product: "Cow Ghee Cream" },
+];
+
+const trustStats = [
+  { icon: Users, value: "10,000+", label: "Happy Customers", labelMr: "आनंदी ग्राहक" },
+  { icon: Award, value: "100%", label: "Natural Ingredients", labelMr: "नैसर्गिक घटक" },
+  { icon: Clock, value: "5+", label: "Years of Trust", labelMr: "वर्षांचा विश्वास" },
+  { icon: ShieldCheck, value: "0%", label: "Chemicals Used", labelMr: "रसायने वापरली" },
 ];
 
 const HomePage = () => {
@@ -100,7 +124,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Shop by Category */}
+      {/* Shop by Category - with images */}
       <section className="container mx-auto px-4 py-14">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -127,7 +151,16 @@ const HomePage = () => {
                 to={`/products?category=${cat.id}`}
                 className="group flex flex-col items-center gap-3 p-6 rounded-2xl bg-card border hover:border-primary/40 hover:shadow-lg transition-all duration-300"
               >
-                <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{cat.icon}</span>
+                <div className="h-20 w-20 rounded-2xl bg-secondary/50 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300">
+                  <img
+                    src={categoryImages[cat.id]}
+                    alt={cat.name}
+                    className="h-16 w-16 object-contain"
+                    loading="lazy"
+                    width={64}
+                    height={64}
+                  />
+                </div>
                 <span className="font-semibold text-sm text-center group-hover:text-primary transition-colors">
                   {language === "en" ? cat.name : cat.nameMarathi}
                 </span>
@@ -178,6 +211,32 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Trust Stats */}
+      <section className="bg-primary/5 border-y">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {trustStats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="text-center"
+              >
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                  <stat.icon className="h-6 w-6 text-primary" />
+                </div>
+                <div className="text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
+                <div className="text-xs text-muted-foreground font-medium mt-1">
+                  {language === "en" ? stat.label : stat.labelMr}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Why Choose Us */}
       <section className="container mx-auto px-4 py-14 md:py-20">
         <motion.div
@@ -212,44 +271,65 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Reviews */}
+      {/* Customer Reviews - Redesigned */}
       <section className="bg-card border-y">
         <div className="container mx-auto px-4 py-14 md:py-20">
-          <motion.h2
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-2xl md:text-3xl font-bold text-center mb-10"
+            className="text-center mb-4"
           >
-            {t("What Our Customers Say", "आमचे ग्राहक काय म्हणतात")}
-          </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[
-              { name: "Priya S.", text: "The Panchagavya soap transformed my skin! So gentle and natural.", textMr: "पंचगव्य साबणाने माझी त्वचा बदलली! खूप सौम्य आणि नैसर्गिक.", rating: 5 },
-              { name: "Rahul M.", text: "Nasya drops helped my sinus problem. Truly Ayurvedic magic.", textMr: "नस्य ड्रॉप्सने माझ्या सायनसच्या समस्येला मदत केली.", rating: 5 },
-              { name: "Sneha K.", text: "Love the handmade quality. You can feel the purity!", textMr: "हस्तनिर्मित गुणवत्ता आवडते. शुद्धता जाणवते!", rating: 4 },
-            ].map((review, i) => (
+            <span className="inline-block px-4 py-1.5 rounded-full bg-secondary text-xs font-semibold text-muted-foreground mb-3 tracking-wide uppercase">
+              {t("Testimonials", "प्रशंसापत्रे")}
+            </span>
+            <h2 className="text-2xl md:text-3xl font-bold">
+              {t("Trusted by 10,000+ Happy Customers", "१०,०००+ आनंदी ग्राहकांचा विश्वास")}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+              {t("Real reviews from real people who have experienced the power of Ayurveda", "आयुर्वेदाची शक्ती अनुभवलेल्या खऱ्या लोकांचे खरे अभिप्राय")}
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-10">
+            {reviews.map((review, i) => (
               <motion.div
                 key={review.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="p-6 rounded-2xl bg-background border hover:shadow-md transition-all duration-300"
+                transition={{ delay: i * 0.15 }}
+                className="relative p-6 rounded-2xl bg-background border hover:shadow-md transition-all duration-300"
               >
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: review.rating }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-accent text-accent" />
+                <Quote className="absolute top-5 right-5 h-8 w-8 text-primary/10" />
+                <div className="flex gap-0.5 mb-3">
+                  {Array.from({ length: review.rating }).map((_, j) => (
+                    <Star key={j} className="h-4 w-4 fill-accent text-accent" />
                   ))}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed italic mb-4">
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5">
                   "{language === "en" ? review.text : review.textMr}"
                 </p>
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-sm font-bold text-primary">{review.name[0]}</span>
+                <div className="border-t pt-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-sm font-bold text-primary">{review.name[0]}</span>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-sm block">{review.name}</span>
+                      <span className="text-xs text-muted-foreground">{review.location}</span>
+                    </div>
                   </div>
-                  <span className="font-semibold text-sm">{review.name}</span>
+                  {review.verified && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
+                      <BadgeCheck className="h-3 w-3" /> {t("Verified", "सत्यापित")}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-3">
+                  <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
+                    {review.product}
+                  </span>
                 </div>
               </motion.div>
             ))}

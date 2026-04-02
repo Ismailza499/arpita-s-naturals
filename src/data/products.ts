@@ -116,8 +116,8 @@ export const products: Product[] = [
 ];
 
 export const categories = [
-  { id: "all", name: "All Products", nameMarathi: "सर्व उत्पादने", icon: "🌿" },
-  { id: "skin-care", name: "Skin Care", nameMarathi: "त्वचा निगा", icon: "✨" },
-  { id: "ayurvedic-treatments", name: "Ayurvedic Treatments", nameMarathi: "आयुर्वेदिक उपचार", icon: "🍃" },
-  { id: "natural-products", name: "Natural Products", nameMarathi: "नैसर्गिक उत्पादने", icon: "🌱" },
+  { id: "all", name: "All Products", nameMarathi: "सर्व उत्पादने", icon: "🌿", image: "/src/assets/category-all.png" },
+  { id: "skin-care", name: "Skin Care", nameMarathi: "त्वचा निगा", icon: "✨", image: "/src/assets/category-skincare.png" },
+  { id: "ayurvedic-treatments", name: "Ayurvedic Treatments", nameMarathi: "आयुर्वेदिक उपचार", icon: "🍃", image: "/src/assets/category-ayurvedic.png" },
+  { id: "natural-products", name: "Natural Products", nameMarathi: "नैसर्गिक उत्पादने", icon: "🌱", image: "/src/assets/category-natural.png" },
 ];
