@@ -1,113 +1,168 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Shield, Leaf, Hand, Droplets, ArrowRight, Star, ChevronRight, Sparkles, Heart, Truck, BadgeCheck, Quote, Award, Users, Clock, ShieldCheck, Ban, Factory, Gem, TreePine } from "lucide-react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { 
+  Shield, Leaf, Hand, Droplets, ArrowRight, Star, ChevronRight, Sparkles, 
+  Heart, Truck, BadgeCheck, Quote, Award, Users, Clock, ShieldCheck, 
+  Ban, Factory, Gem, TreePine, PlayCircle, Volume2, VolumeX, ArrowDown
+} from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { products, categories } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import PanchagavyaPromise from "@/components/PanchagavyaPromise";
 import BestSellers from "@/components/BestSellers";
+
+// Asset placeholders
 import heroBg from "@/assets/hero-bg.jpg";
 import sacredCowImg from "@/assets/sacred-cow.jpg";
 import handmadeImg from "@/assets/handmade-process.jpg";
 import cowProductsImg from "@/assets/cow-products.jpg";
 
-const trustBadges = [
-  { icon: Leaf, label: "100% Natural", labelMr: "१००% नैसर्गिक" },
-  { icon: Hand, label: "Handmade", labelMr: "हस्तनिर्मित" },
-  { icon: Droplets, label: "Desi Cow Based", labelMr: "देशी गाय आधारित" },
-  { icon: Shield, label: "Chemical Free", labelMr: "रसायनमुक्त" },
+// Curated Hero Images for the slideshow
+const heroImages = [
+  heroBg, // Original Hero
+  sacredCowImg, // Second view
+  cowProductsImg // Third view
 ];
 
-const reviews = [
-  { name: "Priya Sharma", location: "Mumbai", text: "The Panchagavya soap transformed my skin! So gentle and natural. I've been using it for 3 months and the results are amazing.", textMr: "पंचगव्य साबणाने माझी त्वचा बदलली! खूप सौम्य आणि नैसर्गिक.", rating: 5, verified: true, product: "Panchagavya Soap" },
-  { name: "Rahul Mhatre", location: "Pune", text: "Nasya drops helped my chronic sinus problem. After trying many medicines, this truly worked. Ayurvedic magic!", textMr: "नस्य ड्रॉप्सने माझ्या सायनसच्या जुन्या समस्येला मदत केली.", rating: 5, verified: true, product: "Panchagavya Nasya" },
-  { name: "Sneha Kulkarni", location: "Nagpur", text: "Love the handmade quality. You can feel the purity in every product. My whole family uses Go Arpita products now!", textMr: "हस्तनिर्मित गुणवत्ता आवडते. शुद्धता जाणवते!", rating: 5, verified: true, product: "Cow Ghee Cream" },
-];
-
-const trustStats = [
-  { icon: Users, value: "10,000+", label: "Happy Customers", labelMr: "आनंदी ग्राहक" },
-  { icon: Award, value: "100%", label: "Natural Ingredients", labelMr: "नैसर्गिक घटक" },
-  { icon: Clock, value: "5+", label: "Years of Trust", labelMr: "वर्षांचा विश्वास" },
-  { icon: ShieldCheck, value: "0%", label: "Chemicals Used", labelMr: "रसायने वापरली" },
-];
+const fadeInUp = {
+  initial: { opacity: 0, y: 30 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+};
 
 const HomePage = () => {
   const { t, language } = useLanguage();
+  const { scrollY } = useScroll();
+  const yScale = useTransform(scrollY, [0, 500], [1, 1.1]);
+
+  // Slideshow State
+  const [currentImg, setCurrentImg] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImg((prev) => (prev + 1) % heroImages.length);
+    }, 5000); // Change image every 5 seconds
+    return () => clearInterval(timer);
+  }, []);
+
+  const trustBadges = [
+    { icon: Leaf, label: "100% Natural", labelMr: "१००% नैसर्गिक" },
+    { icon: Hand, label: "Handmade", labelMr: "हस्तनिर्मित" },
+    { icon: Droplets, label: "Desi Cow Based", labelMr: "देशी गाय आधारित" },
+    { icon: Shield, label: "Chemical Free", labelMr: "रसायनमुक्त" },
+  ];
+
+  const reviews = [
+    { name: "Priya Sharma", location: "Mumbai", text: "The Panchagavya soap transformed my skin! So gentle and natural.", textMr: "पंचगव्य साबणाने माझी त्वचा बदलली!", rating: 5, verified: true, product: "Panchagavya Soap" },
+    { name: "Rahul Mhatre", location: "Pune", text: "Nasya drops helped my chronic sinus problem. Ayurvedic magic!", textMr: "नस्य ड्रॉप्सने माझ्या सायनसच्या जुन्या समस्येला मदत केली.", rating: 5, verified: true, product: "Panchagavya Nasya" },
+    { name: "Sneha Kulkarni", location: "Nagpur", text: "Love the handmade quality. My whole family uses Go Arpita now!", textMr: "हस्तनिर्मित गुणवत्ता आवडते. शुद्धता जाणवते!", rating: 5, verified: true, product: "Cow Ghee Cream" },
+  ];
 
   return (
-    <div className="min-h-screen">
-      {/* Hero */}
-      <section className="relative overflow-hidden">
+    <div className="min-h-screen bg-[#FDFCFB] text-[#1A1A1A] overflow-x-hidden selection:bg-amber-100">
+      
+      {/* 1. CINEMATIC HERO (Image Slideshow Refactor) */}
+      <section className="relative h-screen w-full flex items-center overflow-hidden bg-[#0a0a0a]">
+        
+        {/* The Animated Image Stack */}
         <div className="absolute inset-0">
-          <img src={heroBg} alt="Ayurvedic products" className="w-full h-full object-cover" width={1920} height={800} />
-          <div className="absolute inset-0 bg-gradient-to-r from-foreground/85 via-foreground/65 to-foreground/20" />
-        </div>
-        <div className="relative container mx-auto px-4 py-20 md:py-36">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="max-w-xl"
-          >
-            <motion.span
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 }}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-primary/20 text-herb-light rounded-full text-xs font-medium mb-5 backdrop-blur-sm border border-primary/30"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              {t("100% Natural Ayurvedic Products", "१००% नैसर्गिक आयुर्वेदिक उत्पादने")}
-            </motion.span>
-            <h1 className="text-4xl md:text-6xl font-bold text-background leading-tight">
-              Go Health{" "}
-              <span className="text-accent">Go Wealth</span>
-            </h1>
-            <p className="mt-5 text-background/80 text-base md:text-lg leading-relaxed max-w-md">
-              {t(
-                "Pure, handmade Ayurvedic products crafted from Desi cow-based ingredients. Nature's healing, delivered to your doorstep.",
-                "शुद्ध, हस्तनिर्मित आयुर्वेदिक उत्पादने देशी गाय-आधारित घटकांपासून बनवलेली."
-              )}
-            </p>
+          <AnimatePresence mode="wait">
             <motion.div
+              key={currentImg}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 0.6, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+              className="absolute inset-0 w-full h-full"
+            >
+              <img 
+                src={heroImages[currentImg]} 
+                alt="Ayurvedic Background" 
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Luxury Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-[#FDFCFB]" />
+          <div className="absolute inset-0 opacity-[0.04] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+        </div>
+
+        <div className="container relative z-10 mx-auto px-6">
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            transition={{ duration: 1 }}
+          >
+            {/* Staggered Content Reveal */}
+            <motion.span 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] tracking-[0.3em] uppercase font-bold mb-8"
+            >
+              <Sparkles className="h-3 w-3 text-amber-400" /> {t("The Essence of Ayurveda", "आयुर्वेदाचा सार")}
+            </motion.span>
+
+            <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="flex flex-wrap gap-3 mt-8"
+              transition={{ delay: 0.7, duration: 0.8 }}
+              className="text-6xl md:text-[100px] font-light tracking-tighter text-white leading-[0.85] mb-8"
             >
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-7 py-3.5 rounded-full font-semibold hover:opacity-90 transition-all hover:gap-3"
-              >
-                {t("Shop Now", "आता खरेदी करा")}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/our-story"
-                className="inline-flex items-center gap-2 bg-background/10 text-background px-7 py-3.5 rounded-full font-semibold backdrop-blur-sm border border-background/20 hover:bg-background/20 transition-colors"
-              >
-                {t("Our Story", "आमची कथा")}
+              Go Health, <br /> <span className="italic font-serif text-amber-200">Go Wealth.</span>
+            </motion.h1>
+
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9, duration: 0.8 }}
+              className="text-white/70 text-lg md:text-xl font-light max-w-lg mb-12 leading-relaxed"
+            >
+              {t("Pure, handmade Ayurvedic treasures crafted from the sacred Desi cow. Nature's healing, elevated.", "शुद्ध, हस्तनिर्मित आयुर्वेदिक उत्पादने देशी गाय-आधारित घटकांपासून बनवलेली.")}
+            </motion.p>
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.1, duration: 0.8 }}
+              className="flex flex-wrap gap-6 items-center"
+            >
+              <Link to="/products" className="px-10 py-5 bg-amber-600 text-white rounded-full font-bold hover:bg-amber-700 transition-all flex items-center gap-3 shadow-2xl shadow-amber-900/20 active:scale-95">
+                {t("Shop Now", "आता खरेदी करा")} <ArrowRight size={18} />
               </Link>
             </motion.div>
           </motion.div>
         </div>
+
+        {/* Slideshow Progress Indicators */}
+        <div className="absolute bottom-10 right-10 flex gap-2 z-20">
+          {heroImages.map((_, i) => (
+            <div 
+              key={i} 
+              className={`h-1 transition-all duration-500 rounded-full ${i === currentImg ? 'w-8 bg-amber-400' : 'w-4 bg-white/20'}`} 
+            />
+          ))}
+        </div>
+
+        <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/40 flex flex-col items-center gap-2">
+            <span className="text-[9px] tracking-widest uppercase font-bold">Discover</span>
+            <ArrowDown size={14} />
+        </motion.div>
       </section>
 
-      {/* Trust Badges */}
-      <section className="border-b bg-card">
-        <div className="container mx-auto px-4 py-5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* 2. TRUST BADGES */}
+      <section className="py-12 border-b bg-white">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {trustBadges.map((badge, i) => (
-              <motion.div
-                key={badge.label}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 + i * 0.1 }}
-                className="flex items-center gap-3 justify-center md:justify-start"
-              >
-                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <badge.icon className="h-5 w-5 text-primary" />
+              <motion.div key={i} {...fadeInUp} transition={{ delay: i * 0.1 }} className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-amber-700">
+                  <badge.icon size={24} strokeWidth={1.5} />
                 </div>
-                <span className="text-sm font-semibold">
+                <span className="text-[11px] uppercase tracking-widest font-black text-zinc-500">
                   {language === "en" ? badge.label : badge.labelMr}
                 </span>
               </motion.div>
@@ -116,369 +171,184 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Shop by Category */}
-      <section className="container mx-auto px-4 py-14">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-8"
-        >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-secondary text-xs font-semibold text-muted-foreground mb-3 tracking-wide uppercase">
-            {t("Browse", "ब्राउझ करा")}
-          </span>
-          <h2 className="text-2xl md:text-3xl font-bold">{t("Shop by Category", "श्रेणीनुसार खरेदी करा")}</h2>
-        </motion.div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* 3. SHOP BY CATEGORY */}
+      <section className="py-32 container mx-auto px-6">
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-light tracking-tight mb-4">The <span className="italic font-serif">Apothecary</span></h2>
+          <p className="text-zinc-400 uppercase tracking-widest text-[10px] font-bold">{t("Browse by Category", "श्रेणीनुसार निवडा")}</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-16">
           {categories.filter(c => c.id !== "all").map((cat, i) => (
-            <motion.div
-              key={cat.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.1 }}
-            >
-              <Link
-                to={`/products?category=${cat.id}`}
-                className="group flex flex-col items-center gap-3 p-6 rounded-2xl bg-card border hover:border-primary/40 hover:shadow-lg transition-all duration-300"
-              >
-                <div className="h-20 w-20 rounded-2xl bg-secondary/50 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    className="h-16 w-16 object-contain"
-                    loading="lazy"
-                    width={64}
-                    height={64}
-                  />
+            <motion.div key={cat.id} {...fadeInUp} transition={{ delay: i * 0.1 }} className="group text-center">
+              <Link to={`/products?category=${cat.id}`}>
+                <div className="relative mb-6 mx-auto w-40 h-40 md:w-52 md:h-52 rounded-full overflow-hidden border border-zinc-100 p-2 group-hover:border-amber-300 transition-all duration-700">
+                  <div className="w-full h-full rounded-full bg-zinc-50 overflow-hidden">
+                    <img src={cat.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
+                  </div>
                 </div>
-                <span className="font-semibold text-sm text-center group-hover:text-primary transition-colors">
+                <h3 className="text-xs uppercase tracking-[0.2em] font-black group-hover:text-amber-700 transition-colors">
                   {language === "en" ? cat.name : cat.nameMarathi}
-                </span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </h3>
               </Link>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* 🐄 Sacred Cow - Value of Cow Section */}
-      <section className="bg-earth-dark/5 border-y">
-        <div className="container mx-auto px-4 py-14 md:py-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-10"
-          >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-xs font-semibold text-accent mb-3 tracking-wide uppercase">
-              {t("The Sacred Desi Cow", "पवित्र देशी गाय")}
-            </span>
-            <h2 className="text-2xl md:text-3xl font-bold">{t("Why Desi Cow Products?", "देशी गाय उत्पादने का?")}</h2>
-            <p className="text-muted-foreground mt-2 max-w-xl mx-auto text-sm">
-              {t(
-                "In Ayurveda, the Desi cow is considered sacred. Every product from her — milk, ghee, curd, gomutra, and dung — has powerful healing properties.",
-                "आयुर्वेदात देशी गाय पवित्र मानली जाते. तिचे प्रत्येक उत्पादन — दूध, तूप, दही, गोमूत्र आणि शेण — यांमध्ये शक्तिशाली औषधी गुण आहेत."
-              )}
-            </p>
+      {/* 4. SACRED COW */}
+      <section className="bg-zinc-900 text-white py-32 overflow-hidden relative">
+        <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-24 items-center">
+          <motion.div {...fadeInUp} className="relative group">
+            <div className="absolute -inset-4 border border-amber-600/30 rounded-[40px] group-hover:inset-0 transition-all duration-700" />
+            <img src={sacredCowImg} className="rounded-[30px] w-full aspect-[4/5] object-cover shadow-2xl relative z-10" alt="" />
+            <div className="absolute -bottom-10 -right-10 bg-amber-600 p-10 rounded-[30px] hidden md:block z-20">
+              <Quote size={32} className="text-amber-200 mb-4" />
+              <p className="text-lg font-serif italic leading-relaxed">"The cow is the mother <br /> of all civilization."</p>
+            </div>
           </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="relative rounded-2xl overflow-hidden aspect-[4/3]"
-            >
-              <img src={sacredCowImg} alt="Sacred Desi Cow" className="w-full h-full object-cover" loading="lazy" width={1024} height={640} />
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <p className="text-background text-sm font-medium italic">
-                  {t("\"The cow is the mother of all civilization\" — Mahatma Gandhi", "\"गाय ही सर्व सभ्यतेची माता आहे\" — महात्मा गांधी")}
-                </p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="space-y-4"
-            >
+          <div className="space-y-12">
+            <div className="space-y-4">
+              <span className="text-amber-500 font-bold tracking-[0.4em] uppercase text-[10px]">Sacred Heritage</span>
+              <h2 className="text-5xl md:text-6xl font-light tracking-tighter">Why the <span className="italic font-serif">Desi Cow?</span></h2>
+            </div>
+            <div className="grid gap-6">
               {[
-                { icon: Droplets, title: t("Cow Milk & Ghee", "गाईचे दूध आणि तूप"), desc: t("Rich in A2 protein, deeply nourishing for skin and body. Pure desi cow ghee heals and moisturizes naturally.", "A2 प्रथिनांनी समृद्ध, त्वचेसाठी आणि शरीरासाठी पोषक.") },
-                { icon: Leaf, title: t("Gomutra (Cow Urine)", "गोमूत्र"), desc: t("Powerful natural detoxifier with antibacterial and antifungal properties. Used in Ayurveda for thousands of years.", "शक्तिशाली नैसर्गिक डिटॉक्सिफायर. हजारो वर्षांपासून आयुर्वेदात वापरला जातो.") },
-                { icon: TreePine, title: t("Cow Dung", "गोमय (शेण)"), desc: t("Natural antibacterial agent. Purifies and cleanses deeply. Base ingredient in our Panchagavya soap.", "नैसर्गिक प्रतिजैविक. आमच्या पंचगव्य साबणातील मुख्य घटक.") },
-                { icon: Gem, title: t("Cow Curd", "गाईचे दही"), desc: t("Natural probiotic that cools and soothes skin. Balances pH and adds natural glow.", "नैसर्गिक प्रोबायोटिक. त्वचेला थंडावा देते आणि नैसर्गिक चमक आणते.") },
+                { icon: Droplets, title: t("Cow Milk & Ghee", "गाईचे दूध आणि तूप"), desc: "A2 proteins mirror human skin lipids." },
+                { icon: Leaf, title: t("Gomutra (Cow Urine)", "गोमूत्र"), desc: "Powerful natural detoxifier used for millennia." },
+                { icon: TreePine, title: t("Cow Dung", "गोमय (शेण)"), desc: "Natural antibacterial base for our soaps." }
               ].map((item, i) => (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 15 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="flex gap-4 p-4 rounded-xl bg-card border hover:border-primary/30 hover:shadow-sm transition-all"
-                >
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <item.icon className="h-5 w-5 text-primary" />
-                  </div>
+                <div key={i} className="flex gap-6 p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
+                  <item.icon size={24} className="text-amber-500 shrink-0" />
                   <div>
-                    <h4 className="font-semibold text-sm">{item.title}</h4>
-                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.desc}</p>
+                    <h4 className="font-bold text-sm uppercase tracking-widest mb-1">{item.title}</h4>
+                    <p className="text-xs text-zinc-400 font-light leading-relaxed">{item.desc}</p>
                   </div>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
           </div>
-
-          {/* Cow Products Image Strip */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mt-10 rounded-2xl overflow-hidden relative aspect-[21/9]"
-          >
-            <img src={cowProductsImg} alt="Five sacred products from Desi cow" className="w-full h-full object-cover" loading="lazy" width={1024} height={640} />
-            <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/30 to-transparent flex items-center">
-              <div className="p-6 md:p-10 max-w-md">
-                <h3 className="text-xl md:text-2xl font-bold text-background">{t("Panchagavya — 5 Sacred Gifts", "पंचगव्य — ५ पवित्र भेटवस्तू")}</h3>
-                <p className="text-background/80 text-sm mt-2">{t("Milk, Curd, Ghee, Gomutra & Cow Dung — the foundation of all our products.", "दूध, दही, तूप, गोमूत्र आणि शेण — आमच्या सर्व उत्पादनांचा पाया.")}</p>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </section>
 
-      {/* 🤲 Handmade — No Machine Work */}
-      <section className="container mx-auto px-4 py-14 md:py-20">
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="order-2 md:order-1"
-          >
-            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-accent/10 text-accent rounded-full text-xs font-semibold mb-4">
-              <Hand className="h-3.5 w-3.5" />
-              {t("100% Handcrafted", "१००% हस्तनिर्मित")}
-            </span>
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              {t("Made by Hands, Not Machines", "हातांनी बनवलेले, यंत्रांनी नाही")}
-            </h2>
-            <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-              {t(
-                "Every Go Arpita product is carefully handcrafted by skilled artisans using traditional Ayurvedic methods passed down through generations. No factories, no machines — just pure human touch and ancient wisdom.",
-                "प्रत्येक Go Arpita उत्पादन पिढ्यानपिढ्या चालत आलेल्या पारंपरिक आयुर्वेदिक पद्धतींचा वापर करून कुशल कारागिरांनी काळजीपूर्वक हाताने बनवले आहे."
-              )}
+      {/* 5. HANDMADE */}
+      <section className="py-32 bg-[#FCFAF7]">
+        <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
+          <div className="order-2 lg:order-1 space-y-10">
+            <div>
+              <span className="text-amber-700 font-black tracking-[0.3em] uppercase text-[10px] block mb-4">{t("100% Handcrafted", "१००% हस्तनिर्मित")}</span>
+              <h2 className="text-5xl font-light tracking-tighter leading-tight">Made by <span className="italic font-serif text-amber-800">Hands,</span> <br /> Not Machines.</h2>
+            </div>
+            <p className="text-zinc-500 text-lg font-light leading-relaxed">
+              {t("Every Go Arpita product is slow-made in small batches by skilled artisans. We preserve the vibration of ancient Ayurvedic wisdom through human touch.", "प्रत्येक Go Arpita उत्पादन पिढ्यानपिढ्या चालत आलेल्या पारंपरिक पद्धतींनी बनवले जाते.")}
             </p>
-
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               {[
-                { icon: Ban, title: t("Zero Machines", "शून्य यंत्रे"), desc: t("No factory processing involved", "कोणतीही कारखाना प्रक्रिया नाही") },
-                { icon: Hand, title: t("Handmade with Love", "प्रेमाने हस्तनिर्मित"), desc: t("Each piece crafted individually", "प्रत्येक तुकडा वैयक्तिकरित्या") },
-                { icon: Factory, title: t("No Chemicals", "रसायने नाहीत"), desc: t("No preservatives or additives", "कोणतेही संरक्षक नाहीत") },
-                { icon: Leaf, title: t("Eco-Friendly", "पर्यावरण-अनुकूल"), desc: t("Biodegradable & sustainable", "जैवविघटनशील आणि टिकाऊ") },
+                { icon: Ban, label: t("Zero Machines", "शून्य यंत्रे") },
+                { icon: Heart, label: t("Made with Love", "प्रेमाने हस्तनिर्मित") },
+                { icon: Factory, label: t("No Chemicals", "रसायने नाहीत") },
+                { icon: Leaf, label: t("Eco-Friendly", "पर्यावरण-अनुकूल") }
               ].map((item, i) => (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 15 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="p-4 rounded-xl bg-card border hover:border-primary/30 transition-all"
-                >
-                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                    <item.icon className="h-4 w-4 text-primary" />
-                  </div>
-                  <h4 className="font-semibold text-xs">{item.title}</h4>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{item.desc}</p>
-                </motion.div>
+                <div key={i} className="flex items-center gap-3 p-4 rounded-xl bg-white border border-zinc-100">
+                  <item.icon size={16} className="text-amber-600" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">{item.label}</span>
+                </div>
               ))}
             </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="order-1 md:order-2 relative rounded-2xl overflow-hidden aspect-square"
-          >
-            <img src={handmadeImg} alt="Handmade process" className="w-full h-full object-cover" loading="lazy" width={1024} height={640} />
-            <div className="absolute inset-0 bg-gradient-to-t from-foreground/30 to-transparent" />
-          </motion.div>
+          </div>
+          <div className="order-1 lg:order-2">
+            <img src={handmadeImg} className="rounded-[40px] shadow-2xl w-full aspect-square object-cover" alt="" />
+          </div>
         </div>
       </section>
 
-      {/* Panchagavya Promise */}
       <PanchagavyaPromise />
-
-      {/* Best Sellers */}
       <BestSellers />
 
-      {/* Featured Products */}
-      <section className="bg-card border-y py-14 md:py-20">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center justify-between mb-8"
-          >
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold">{t("All Products", "सर्व उत्पादने")}</h2>
-              <p className="text-sm text-muted-foreground mt-1">{t("Explore our complete collection", "आमचा संपूर्ण संग्रह पहा")}</p>
-            </div>
-            <Link to="/products" className="hidden md:flex items-center gap-2 text-primary font-medium text-sm hover:gap-3 transition-all">
-              {t("View All", "सर्व पहा")} <ArrowRight className="h-4 w-4" />
-            </Link>
-          </motion.div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-            {products.map((product, i) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-              >
-                <ProductCard product={product} />
-              </motion.div>
-            ))}
+      {/* 7. ALL PRODUCTS */}
+      <section className="py-32 container mx-auto px-6">
+        <div className="flex items-end justify-between mb-16 border-b border-zinc-100 pb-8">
+          <div>
+            <h2 className="text-4xl font-light tracking-tight">{t("The Collection", "सर्व उत्पादने")}</h2>
+            <p className="text-xs text-zinc-400 mt-2 tracking-widest uppercase">{t("Explore our full apothecary", "आमचा संपूर्ण संग्रह पहा")}</p>
           </div>
+          <Link to="/products" className="text-amber-700 font-bold flex items-center gap-2 group">
+            {t("View All", "सर्व पहा")} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
-      </section>
-
-      {/* Trust Stats */}
-      <section className="bg-primary/5 border-y">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {trustStats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center"
-              >
-                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <stat.icon className="h-6 w-6 text-primary" />
-                </div>
-                <div className="text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
-                <div className="text-xs text-muted-foreground font-medium mt-1">
-                  {language === "en" ? stat.label : stat.labelMr}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="container mx-auto px-4 py-14 md:py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10"
-        >
-          <h2 className="text-2xl md:text-3xl font-bold">{t("Why Choose Go Arpita?", "Go Arpita का निवडावे?")}</h2>
-        </motion.div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {[
-            { icon: BadgeCheck, title: t("Certified Purity", "प्रमाणित शुद्धता"), desc: t("Every product tested for purity and quality. No chemicals, no shortcuts.", "प्रत्येक उत्पादन शुद्धता आणि गुणवत्तेसाठी तपासले जाते.") },
-            { icon: Truck, title: t("Fast Delivery", "जलद डिलिव्हरी"), desc: t("Free delivery on orders above ₹500. Quick delivery across India.", "₹500 वरील ऑर्डरवर मोफत डिलिव्हरी.") },
-            { icon: Heart, title: t("Made with Love", "प्रेमाने बनवले"), desc: t("Handcrafted by skilled artisans using traditional Ayurvedic methods.", "पारंपरिक आयुर्वेदिक पद्धतींचा वापर करून कुशल कारागिरांनी बनवलेले.") },
-          ].map((item, i) => (
-            <motion.div
-              key={item.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="group p-6 rounded-2xl bg-card border hover:border-primary/30 hover:shadow-lg transition-all duration-300 text-center"
-            >
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                <item.icon className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-bold mb-2">{item.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-16">
+          {products.map((product, i) => (
+            <motion.div key={product.id} {...fadeInUp} transition={{ delay: i * 0.05 }}>
+              <ProductCard product={product} />
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Customer Reviews */}
-      <section className="bg-card border-y">
-        <div className="container mx-auto px-4 py-14 md:py-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-4"
-          >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-secondary text-xs font-semibold text-muted-foreground mb-3 tracking-wide uppercase">
-              {t("Testimonials", "प्रशंसापत्रे")}
-            </span>
-            <h2 className="text-2xl md:text-3xl font-bold">
-              {t("Trusted by 10,000+ Happy Customers", "१०,०००+ आनंदी ग्राहकांचा विश्वास")}
-            </h2>
-            <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
-              {t("Real reviews from real people who have experienced the power of Ayurveda", "आयुर्वेदाची शक्ती अनुभवलेल्या खऱ्या लोकांचे खरे अभिप्राय")}
-            </p>
-          </motion.div>
+      {/* 8. TRUST STATS */}
+      <section className="py-24 bg-zinc-900 text-white">
+        <div className="container mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+          {[
+            { icon: Users, val: "10K+", label: "Pure Souls Served" },
+            { icon: Award, val: "100%", label: "Natural Purity" },
+            { icon: Clock, val: "5+", label: "Years of Trust" },
+            { icon: ShieldCheck, val: "0%", label: "Chemicals Used" }
+          ].map((stat, i) => (
+            <div key={i}>
+              <stat.icon size={24} className="mx-auto mb-4 text-amber-500 opacity-50" />
+              <div className="text-4xl font-light mb-2">{stat.val}</div>
+              <div className="text-[10px] tracking-[0.2em] font-bold text-zinc-500 uppercase">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-10">
-            {reviews.map((review, i) => (
-              <motion.div
-                key={review.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15 }}
-                className="relative p-6 rounded-2xl bg-background border hover:shadow-md transition-all duration-300"
-              >
-                <Quote className="absolute top-5 right-5 h-8 w-8 text-primary/10" />
-                <div className="flex gap-0.5 mb-3">
-                  {Array.from({ length: review.rating }).map((_, j) => (
-                    <Star key={j} className="h-4 w-4 fill-accent text-accent" />
-                  ))}
+      {/* 9. REVIEWS */}
+      <section className="py-32 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl font-light tracking-tight italic font-serif text-amber-900">{t("The Voice of Trust", "आनंदी ग्राहक")}</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-12">
+            {reviews.map((rev, i) => (
+              <motion.div key={i} {...fadeInUp} transition={{ delay: i * 0.15 }} className="relative p-10 rounded-[40px] bg-zinc-50 hover:bg-amber-50/30 transition-all group">
+                <Quote size={40} className="absolute top-8 left-8 text-amber-700/5 group-hover:text-amber-700/10 transition-colors" />
+                <div className="flex gap-1 mb-6">
+                  {[...Array(5)].map((_, j) => <Star key={j} size={14} className="fill-amber-500 text-amber-500" />)}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-                  "{language === "en" ? review.text : review.textMr}"
-                </p>
-                <div className="border-t pt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-sm font-bold text-primary">{review.name[0]}</span>
-                    </div>
-                    <div>
-                      <span className="font-semibold text-sm block">{review.name}</span>
-                      <span className="text-xs text-muted-foreground">{review.location}</span>
-                    </div>
+                <p className="text-zinc-600 font-serif italic text-lg leading-relaxed mb-8 relative z-10">"{language === "en" ? rev.text : rev.textMr}"</p>
+                <div className="flex items-center gap-4 border-t border-zinc-200 pt-6">
+                  <div className="h-10 w-10 rounded-full bg-amber-700 text-white flex items-center justify-center font-bold text-xs">{rev.name[0]}</div>
+                  <div>
+                    <span className="block text-sm font-bold">{rev.name}</span>
+                    <span className="text-[10px] text-zinc-400 uppercase tracking-widest">{rev.location}</span>
                   </div>
-                  {review.verified && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
-                      <BadgeCheck className="h-3 w-3" /> {t("Verified", "सत्यापित")}
-                    </span>
-                  )}
-                </div>
-                <div className="mt-3">
-                  <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-                    {review.product}
-                  </span>
+                  {rev.verified && <BadgeCheck size={16} className="ml-auto text-amber-600" />}
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* 10. WHY CHOOSE US */}
+      <section className="py-32 container mx-auto px-6 border-t border-zinc-100">
+        <div className="grid md:grid-cols-3 gap-12 text-center">
+            {[
+              { icon: BadgeCheck, title: t("Certified Purity", "प्रमाणित शुद्धता"), desc: "Every product tested for quality." },
+              { icon: Truck, title: t("Fast Delivery", "जलद डिलिव्हरी"), desc: "Free shipping on orders above ₹500." },
+              { icon: Heart, title: t("Ethical Source", "नैतिक स्त्रोत"), desc: "Supporting local Gaushalas." }
+            ].map((item, i) => (
+              <div key={i} className="group">
+                <div className="h-16 w-16 rounded-3xl bg-zinc-50 flex items-center justify-center mx-auto mb-6 group-hover:bg-amber-600 group-hover:text-white transition-all duration-500">
+                  <item.icon size={28} strokeWidth={1} />
+                </div>
+                <h4 className="text-sm font-bold uppercase tracking-widest mb-2">{item.title}</h4>
+                <p className="text-xs text-zinc-400 leading-relaxed max-w-[200px] mx-auto">{item.desc}</p>
+              </div>
+            ))}
+        </div>
+      </section>
+
     </div>
   );
 };
