@@ -1,3 +1,12 @@
+import soapImg from "@/assets/panchagavya-soap.jpg";
+import nasyaImg from "@/assets/panchagavya-nasya.jpg";
+import facepackImg from "@/assets/turmeric-facepack.jpg";
+import gheeImg from "@/assets/cow-ghee-cream.jpg";
+import categoryAllImg from "@/assets/category-all.png";
+import categorySkincareImg from "@/assets/category-skincare.png";
+import categoryAyurvedicImg from "@/assets/category-ayurvedic.png";
+import categoryNaturalImg from "@/assets/category-natural.png";
+
 export interface Product {
   id: string;
   name: string;
@@ -25,7 +34,7 @@ export const products: Product[] = [
     nameMarathi: "पंचगव्य साबण",
     price: 120,
     originalPrice: 180,
-    image: "/src/assets/panchagavya-soap.jpg",
+    image: soapImg,
     category: "Skin Care",
     description: "100% natural Ayurvedic skincare soap made using Desi cow-based ingredients and herbs. Deep cleansing with the power of Panchagavya.",
     descriptionMarathi: "पंचगव्य साबण हा पूर्णपणे नैसर्गिक आणि आयुर्वेदिक तत्वांवर आधारित स्किन केअर उत्पादन आहे.",
@@ -50,7 +59,7 @@ export const products: Product[] = [
     nameMarathi: "पंचगव्य नस्य",
     price: 250,
     originalPrice: 350,
-    image: "/src/assets/panchagavya-nasya.jpg",
+    image: nasyaImg,
     category: "Ayurvedic Treatments",
     description: "Traditional Ayurvedic nasal therapy product made from Panchagavya — Milk, Curd, Ghee, Gomutra, and Cow dung. Improves breathing and mental clarity.",
     descriptionMarathi: "पारंपरिक आयुर्वेदिक नाकाची चिकित्सा उत्पादन. श्वासोच्छ्वास आणि मानसिक स्पष्टता सुधारते.",
@@ -75,7 +84,7 @@ export const products: Product[] = [
     nameMarathi: "हळद फेस पॅक",
     price: 150,
     originalPrice: 220,
-    image: "/src/assets/panchagavya-soap.jpg",
+    image: facepackImg,
     category: "Skin Care",
     description: "Pure turmeric and sandalwood face pack for glowing, blemish-free skin.",
     descriptionMarathi: "शुद्ध हळद आणि चंदन फेस पॅक चमकदार, डागरहित त्वचेसाठी.",
@@ -97,7 +106,7 @@ export const products: Product[] = [
     nameMarathi: "देशी गाय तूप क्रीम",
     price: 200,
     originalPrice: 300,
-    image: "/src/assets/panchagavya-nasya.jpg",
+    image: gheeImg,
     category: "Natural Products",
     description: "Deeply moisturizing cream made with pure desi cow ghee and herbs.",
     descriptionMarathi: "शुद्ध देशी गाय तूप आणि औषधी वनस्पतींपासून बनवलेली मॉइश्चरायझिंग क्रीम.",
@@ -116,8 +125,8 @@ export const products: Product[] = [
 ];
 
 export const categories = [
-  { id: "all", name: "All Products", nameMarathi: "सर्व उत्पादने", icon: "🌿", image: "/src/assets/category-all.png" },
-  { id: "skin-care", name: "Skin Care", nameMarathi: "त्वचा निगा", icon: "✨", image: "/src/assets/category-skincare.png" },
-  { id: "ayurvedic-treatments", name: "Ayurvedic Treatments", nameMarathi: "आयुर्वेदिक उपचार", icon: "🍃", image: "/src/assets/category-ayurvedic.png" },
-  { id: "natural-products", name: "Natural Products", nameMarathi: "नैसर्गिक उत्पादने", icon: "🌱", image: "/src/assets/category-natural.png" },
+  { id: "all", name: "All Products", nameMarathi: "सर्व उत्पादने", icon: "🌿", image: categoryAllImg },
+  { id: "skin-care", name: "Skin Care", nameMarathi: "त्वचा निगा", icon: "✨", image: categorySkincareImg },
+  { id: "ayurvedic-treatments", name: "Ayurvedic Treatments", nameMarathi: "आयुर्वेदिक उपचार", icon: "🍃", image: categoryAyurvedicImg },
+  { id: "natural-products", name: "Natural Products", nameMarathi: "नैसर्गिक उत्पादने", icon: "🌱", image: categoryNaturalImg },
 ];
