@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/context/CartContext";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 
 import Preloader from "@/components/Preloader"; // 3. Import Preloader
 import Header from "@/components/Header";
@@ -47,41 +48,49 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <LanguageProvider>
-          <CartProvider>
-            <Toaster />
-            <Sonner />
-            
-            {/* 4. AnimatePresence handles the smooth exit of the Preloader */}
-            <AnimatePresence mode="wait">
-              {isLoading && <Preloader key="loader" />}
-            </AnimatePresence>
+          <AdminAuthProvider>
+            <CartProvider>
+              <Toaster />
+              <Sonner />
+              
+              <AnimatePresence mode="wait">
+                {isLoading && <Preloader key="loader" />}
+              </AnimatePresence>
 
-            <BrowserRouter>
-            <ScrollToTop />
-              <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="flex-1">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/products" element={<ProductsPage />} />
-                    <Route path="/product/:id" element={<ProductDetailPage />} />
-                    <Route path="/checkout" element={<CheckoutPage />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/our-story" element={<OurStoryPage />} />
-                    <Route path="/blog" element={<BlogPage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/admin" element={<AdminLoginPage />} />
-                    <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </main>
-                <Footer />
-                <CartSidebar />
-                <FloatingCart />
-                <FloatingConcierge />
-              </div>
-            </BrowserRouter>
-          </CartProvider>
+              <BrowserRouter>
+              <ScrollToTop />
+                <Routes>
+                  {/* Admin routes - no header/footer */}
+                  <Route path="/admin" element={<AdminLoginPage />} />
+                  <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
+                  
+                  {/* Public routes with header/footer */}
+                  <Route path="*" element={
+                    <div className="min-h-screen flex flex-col">
+                      <Header />
+                      <main className="flex-1">
+                        <Routes>
+                          <Route path="/" element={<Index />} />
+                          <Route path="/products" element={<ProductsPage />} />
+                          <Route path="/product/:id" element={<ProductDetailPage />} />
+                          <Route path="/checkout" element={<CheckoutPage />} />
+                          <Route path="/about" element={<AboutPage />} />
+                          <Route path="/our-story" element={<OurStoryPage />} />
+                          <Route path="/blog" element={<BlogPage />} />
+                          <Route path="/contact" element={<ContactPage />} />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </main>
+                      <Footer />
+                      <CartSidebar />
+                      <FloatingCart />
+                      <FloatingConcierge />
+                    </div>
+                  } />
+                </Routes>
+              </BrowserRouter>
+            </CartProvider>
+          </AdminAuthProvider>
         </LanguageProvider>
       </TooltipProvider>
     </QueryClientProvider>
