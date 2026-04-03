@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/context/CartContext";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 
 import Preloader from "@/components/Preloader"; // 3. Import Preloader
 import Header from "@/components/Header";
