@@ -70,6 +70,8 @@ const App = () => {
                     <Route path="/our-story" element={<OurStoryPage />} />
                     <Route path="/blog" element={<BlogPage />} />
                     <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/admin" element={<AdminLoginPage />} />
+                    <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>
