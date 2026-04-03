@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,45 +14,26 @@ const AdminLoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signIn } = useAdminAuth();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-
-      // Check if user has admin role
-      const { data: roleData, error: roleError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", data.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (roleError || !roleData) {
-        await supabase.auth.signOut();
+    setTimeout(() => {
+      const success = signIn(email, password);
+      if (success) {
+        toast({ title: "Welcome back, Admin!", description: "Redirecting to dashboard..." });
+        navigate("/admin/dashboard");
+      } else {
         toast({
-          title: "Access Denied",
-          description: "You do not have admin privileges.",
+          title: "Login Failed",
+          description: "Invalid email or password.",
           variant: "destructive",
         });
-        setLoading(false);
-        return;
       }
-
-      toast({ title: "Welcome back, Admin!", description: "Redirecting to dashboard..." });
-      navigate("/admin/dashboard");
-    } catch (error: any) {
-      toast({
-        title: "Login Failed",
-        description: error.message || "Invalid credentials",
-        variant: "destructive",
-      });
-    } finally {
       setLoading(false);
-    }
+    }, 500);
   };
 
   return (
@@ -105,7 +86,7 @@ const AdminLoginPage = () => {
           </form>
           <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <ShieldCheck className="w-4 h-4" />
-            <span>Protected by Lovable Cloud</span>
+            <span>Secure Admin Access</span>
           </div>
         </CardContent>
       </Card>

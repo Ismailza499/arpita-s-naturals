@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useNavigate } from "react-router-dom";
+import { getAdminProducts, saveAdminProducts, generateId, AdminProduct } from "@/lib/adminProducts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,123 +13,91 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, LogOut, Package, Star, Leaf, LayoutDashboard } from "lucide-react";
-import type { Tables } from "@/integrations/supabase/types";
 
-type Product = Tables<"products">;
-
-const emptyProduct = {
-  slug: "",
+const emptyProduct: Omit<AdminProduct, "id" | "ingredients"> & { id?: string } = {
   name: "",
-  name_marathi: "",
+  nameMarathi: "",
   price: 0,
-  original_price: 0,
-  image_url: "",
+  originalPrice: 0,
+  image: "",
   category: "Skin Care",
   description: "",
-  description_marathi: "",
-  benefits: [] as string[],
-  benefits_marathi: [] as string[],
-  usps: [] as string[],
+  descriptionMarathi: "",
+  benefits: [],
+  benefitsMarathi: [],
+  usps: [],
   weight: "",
-  in_stock: true,
-  is_best_seller: false,
+  inStock: true,
+  isBestSeller: false,
+  sortOrder: 0,
   rating: 0,
-  reviews_count: 0,
-  sort_order: 0,
+  reviews: 0,
 };
 
 const AdminDashboardPage = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [editProduct, setEditProduct] = useState<Partial<Product> | null>(null);
+  const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [editProduct, setEditProduct] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const { signOut, user } = useAdminAuth();
+  const { signOut, email } = useAdminAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const fetchProducts = async () => {
-    const { data } = await supabase
-      .from("products")
-      .select("*")
-      .order("sort_order", { ascending: true });
-    if (data) setProducts(data);
-  };
-
   useEffect(() => {
-    fetchProducts();
+    setProducts(getAdminProducts());
   }, []);
 
-  const handleSave = async () => {
-    if (!editProduct?.name || !editProduct?.slug || !editProduct?.price) {
-      toast({ title: "Missing fields", description: "Name, slug, and price are required.", variant: "destructive" });
+  const persist = (updated: AdminProduct[]) => {
+    setProducts(updated);
+    saveAdminProducts(updated);
+  };
+
+  const handleSave = () => {
+    if (!editProduct?.name || !editProduct?.price) {
+      toast({ title: "Missing fields", description: "Name and price are required.", variant: "destructive" });
       return;
     }
     setSaving(true);
 
-    try {
+    setTimeout(() => {
       if (editProduct.id) {
-        // Update
-        const { id, created_at, updated_at, ...updateData } = editProduct as Product;
-        const { error } = await supabase.from("products").update(updateData).eq("id", id);
-        if (error) throw error;
+        const updated = products.map((p) => (p.id === editProduct.id ? { ...p, ...editProduct } : p));
+        persist(updated);
         toast({ title: "Product updated!" });
       } else {
-        // Insert
-        const { error } = await supabase.from("products").insert({
-          slug: editProduct.slug!,
-          name: editProduct.name!,
-          name_marathi: editProduct.name_marathi || null,
-          price: editProduct.price!,
-          original_price: editProduct.original_price || null,
-          image_url: editProduct.image_url || null,
-          category: editProduct.category || "Skin Care",
-          description: editProduct.description || null,
-          description_marathi: editProduct.description_marathi || null,
-          benefits: editProduct.benefits || [],
-          benefits_marathi: editProduct.benefits_marathi || [],
-          usps: editProduct.usps || [],
-          weight: editProduct.weight || null,
-          in_stock: editProduct.in_stock ?? true,
-          is_best_seller: editProduct.is_best_seller ?? false,
-          rating: editProduct.rating || 0,
-          reviews_count: editProduct.reviews_count || 0,
-          sort_order: editProduct.sort_order || 0,
-        });
-        if (error) throw error;
+        const newProduct: AdminProduct = {
+          ...editProduct,
+          id: generateId(),
+          ingredients: [],
+        };
+        persist([...products, newProduct]);
         toast({ title: "Product created!" });
       }
       setIsDialogOpen(false);
       setEditProduct(null);
-      fetchProducts();
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } finally {
       setSaving(false);
-    }
+    }, 300);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Product deleted" });
-      fetchProducts();
-    }
+    persist(products.filter((p) => p.id !== id));
+    toast({ title: "Product deleted" });
   };
 
-  const toggleBestSeller = async (id: string, current: boolean | null) => {
-    const { error } = await supabase.from("products").update({ is_best_seller: !current }).eq("id", id);
-    if (!error) fetchProducts();
+  const toggleBestSeller = (id: string) => {
+    const updated = products.map((p) =>
+      p.id === id ? { ...p, isBestSeller: !p.isBestSeller } : p
+    );
+    persist(updated);
   };
 
-  const handleLogout = async () => {
-    await signOut();
+  const handleLogout = () => {
+    signOut();
     navigate("/admin");
   };
 
-  const bestSellers = products.filter((p) => p.is_best_seller);
+  const bestSellers = products.filter((p) => p.isBestSeller);
 
   return (
     <div className="min-h-screen bg-secondary/20">
@@ -142,7 +110,7 @@ const AdminDashboardPage = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">Go Arpita Admin</h1>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
+              <p className="text-xs text-muted-foreground">{email}</p>
             </div>
           </div>
           <Button variant="outline" size="sm" onClick={handleLogout}>
@@ -183,7 +151,7 @@ const AdminDashboardPage = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">
-                  {products.filter((p) => p.in_stock).length}
+                  {products.filter((p) => p.inStock).length}
                 </p>
                 <p className="text-sm text-muted-foreground">In Stock</p>
               </div>
@@ -197,10 +165,7 @@ const AdminDashboardPage = () => {
             <CardTitle className="text-xl">Products</CardTitle>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button
-                  onClick={() => setEditProduct({ ...emptyProduct })}
-                  size="sm"
-                >
+                <Button onClick={() => setEditProduct({ ...emptyProduct })} size="sm">
                   <Plus className="w-4 h-4 mr-2" /> Add Product
                 </Button>
               </DialogTrigger>
@@ -215,12 +180,8 @@ const AdminDashboardPage = () => {
                       <Input value={editProduct.name || ""} onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })} />
                     </div>
                     <div className="space-y-2">
-                      <Label>Slug *</Label>
-                      <Input value={editProduct.slug || ""} onChange={(e) => setEditProduct({ ...editProduct, slug: e.target.value })} placeholder="e.g. panchagavya-soap" />
-                    </div>
-                    <div className="space-y-2">
                       <Label>Name (Marathi)</Label>
-                      <Input value={editProduct.name_marathi || ""} onChange={(e) => setEditProduct({ ...editProduct, name_marathi: e.target.value })} />
+                      <Input value={editProduct.nameMarathi || ""} onChange={(e) => setEditProduct({ ...editProduct, nameMarathi: e.target.value })} />
                     </div>
                     <div className="space-y-2">
                       <Label>Category</Label>
@@ -234,16 +195,20 @@ const AdminDashboardPage = () => {
                       </Select>
                     </div>
                     <div className="space-y-2">
+                      <Label>Weight</Label>
+                      <Input value={editProduct.weight || ""} onChange={(e) => setEditProduct({ ...editProduct, weight: e.target.value })} placeholder="e.g. 100g" />
+                    </div>
+                    <div className="space-y-2">
                       <Label>Price (₹) *</Label>
                       <Input type="number" value={editProduct.price || ""} onChange={(e) => setEditProduct({ ...editProduct, price: Number(e.target.value) })} />
                     </div>
                     <div className="space-y-2">
                       <Label>Original Price (₹)</Label>
-                      <Input type="number" value={editProduct.original_price || ""} onChange={(e) => setEditProduct({ ...editProduct, original_price: Number(e.target.value) })} />
+                      <Input type="number" value={editProduct.originalPrice || ""} onChange={(e) => setEditProduct({ ...editProduct, originalPrice: Number(e.target.value) })} />
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <Label>Image URL</Label>
-                      <Input value={editProduct.image_url || ""} onChange={(e) => setEditProduct({ ...editProduct, image_url: e.target.value })} placeholder="https://..." />
+                      <Input value={editProduct.image || ""} onChange={(e) => setEditProduct({ ...editProduct, image: e.target.value })} placeholder="https://..." />
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <Label>Description</Label>
@@ -251,37 +216,29 @@ const AdminDashboardPage = () => {
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <Label>Description (Marathi)</Label>
-                      <Textarea value={editProduct.description_marathi || ""} onChange={(e) => setEditProduct({ ...editProduct, description_marathi: e.target.value })} rows={3} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Weight</Label>
-                      <Input value={editProduct.weight || ""} onChange={(e) => setEditProduct({ ...editProduct, weight: e.target.value })} placeholder="e.g. 100g" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Sort Order</Label>
-                      <Input type="number" value={editProduct.sort_order || 0} onChange={(e) => setEditProduct({ ...editProduct, sort_order: Number(e.target.value) })} />
+                      <Textarea value={editProduct.descriptionMarathi || ""} onChange={(e) => setEditProduct({ ...editProduct, descriptionMarathi: e.target.value })} rows={3} />
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <Label>Benefits (comma separated)</Label>
                       <Input
                         value={(editProduct.benefits || []).join(", ")}
-                        onChange={(e) => setEditProduct({ ...editProduct, benefits: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
+                        onChange={(e) => setEditProduct({ ...editProduct, benefits: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) })}
                       />
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <Label>USPs (comma separated)</Label>
                       <Input
                         value={(editProduct.usps || []).join(", ")}
-                        onChange={(e) => setEditProduct({ ...editProduct, usps: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
+                        onChange={(e) => setEditProduct({ ...editProduct, usps: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) })}
                       />
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="flex items-center gap-2">
-                        <Switch checked={editProduct.in_stock ?? true} onCheckedChange={(v) => setEditProduct({ ...editProduct, in_stock: v })} />
+                        <Switch checked={editProduct.inStock ?? true} onCheckedChange={(v) => setEditProduct({ ...editProduct, inStock: v })} />
                         <Label>In Stock</Label>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Switch checked={editProduct.is_best_seller ?? false} onCheckedChange={(v) => setEditProduct({ ...editProduct, is_best_seller: v })} />
+                        <Switch checked={editProduct.isBestSeller ?? false} onCheckedChange={(v) => setEditProduct({ ...editProduct, isBestSeller: v })} />
                         <Label>Best Seller</Label>
                       </div>
                     </div>
@@ -316,31 +273,31 @@ const AdminDashboardPage = () => {
                       <TableRow key={product.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            {product.image_url && (
-                              <img src={product.image_url} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
+                            {product.image && (
+                              <img src={product.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
                             )}
                             <div>
                               <p className="font-medium text-foreground">{product.name}</p>
-                              <p className="text-xs text-muted-foreground">{product.slug}</p>
+                              <p className="text-xs text-muted-foreground">{product.id}</p>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">{product.category}</TableCell>
                         <TableCell>
                           <span className="font-semibold text-foreground">₹{product.price}</span>
-                          {product.original_price && (
-                            <span className="ml-2 text-xs line-through text-muted-foreground">₹{product.original_price}</span>
+                          {product.originalPrice && (
+                            <span className="ml-2 text-xs line-through text-muted-foreground">₹{product.originalPrice}</span>
                           )}
                         </TableCell>
                         <TableCell>
-                          <span className={`text-xs px-2 py-1 rounded-full ${product.in_stock ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
-                            {product.in_stock ? "In Stock" : "Out"}
+                          <span className={`text-xs px-2 py-1 rounded-full ${product.inStock ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
+                            {product.inStock ? "In Stock" : "Out"}
                           </span>
                         </TableCell>
                         <TableCell>
                           <Switch
-                            checked={!!product.is_best_seller}
-                            onCheckedChange={() => toggleBestSeller(product.id, product.is_best_seller)}
+                            checked={!!product.isBestSeller}
+                            onCheckedChange={() => toggleBestSeller(product.id)}
                           />
                         </TableCell>
                         <TableCell className="text-right">
@@ -349,7 +306,7 @@ const AdminDashboardPage = () => {
                               variant="outline"
                               size="icon"
                               onClick={() => {
-                                setEditProduct(product);
+                                setEditProduct({ ...product });
                                 setIsDialogOpen(true);
                               }}
                             >
@@ -381,7 +338,7 @@ const AdminDashboardPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {bestSellers.map((p) => (
                   <div key={p.id} className="border border-border rounded-xl p-4 bg-card">
-                    {p.image_url && <img src={p.image_url} alt={p.name} className="w-full h-32 object-cover rounded-lg mb-3" />}
+                    {p.image && <img src={p.image} alt={p.name} className="w-full h-32 object-cover rounded-lg mb-3" />}
                     <h3 className="font-semibold text-foreground">{p.name}</h3>
                     <p className="text-primary font-bold mt-1">₹{p.price}</p>
                   </div>
