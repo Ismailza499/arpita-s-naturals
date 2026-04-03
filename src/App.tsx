@@ -24,6 +24,9 @@ import OurStoryPage from "./pages/OurStoryPage";
 import BlogPage from "./pages/BlogPage";
 import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminRoute from "./components/AdminRoute";
 import FloatingConcierge from "./components/FloatingConcierge";
 import ScrollToTop from "./components/ScrollToTop";
 const queryClient = new QueryClient();
@@ -67,6 +70,8 @@ const App = () => {
                     <Route path="/our-story" element={<OurStoryPage />} />
                     <Route path="/blog" element={<BlogPage />} />
                     <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/admin" element={<AdminLoginPage />} />
+                    <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>
